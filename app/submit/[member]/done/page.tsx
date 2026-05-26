@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { createDb, getReviewByMemberAndDate, getAnalysis } from '@/lib/db'
+import { createDb, getReviewByMemberAndDate, getIndividualAnalysis, getAnalysis } from '@/lib/db'
 import { MEMBERS } from '@/types'
 import type { MemberName, StatusResponse } from '@/types'
 import WaitingStatus from '@/components/WaitingStatus'
@@ -21,19 +21,21 @@ export default function DonePage({ params }: Props) {
     MEMBERS.map((m) => [m, !!getReviewByMemberAndDate(db, m, today)])
   ) as StatusResponse['submitted']
 
-  const all_submitted = MEMBERS.every((m) => submitted[m])
-  const analysis_ready = !!getAnalysis(db, today)
+  const individual_ready = Object.fromEntries(
+    MEMBERS.map((m) => [m, !!getIndividualAnalysis(db, m, today)])
+  ) as StatusResponse['individual_ready']
 
   const initialStatus: StatusResponse = {
     date: today,
     submitted,
-    all_submitted,
-    analysis_ready,
+    individual_ready,
+    all_submitted: MEMBERS.every((m) => submitted[m]),
+    team_summary_ready: !!getAnalysis(db, today),
   }
 
   return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <WaitingStatus initialStatus={initialStatus} />
+      <WaitingStatus member={member} initialStatus={initialStatus} />
     </main>
   )
 }

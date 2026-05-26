@@ -20,6 +20,14 @@ export interface AnalysisRow {
   created_at: string
 }
 
+export interface IndividualAnalysisRow {
+  id: number
+  member: MemberName
+  date: string
+  result: string  // JSON string
+  created_at: string
+}
+
 export interface AssetRow {
   id: number
   date: string
@@ -29,6 +37,18 @@ export interface AssetRow {
   library: LibraryName
   use_for: string
   created_at: string
+}
+
+export interface GoalsRow {
+  id: number
+  team_goal: string
+  individual_goals: string  // JSON string
+  updated_at: string
+}
+
+export interface Goals {
+  team_goal: string
+  individual_goals: Partial<Record<MemberName, string>>
 }
 
 // AI analysis types — mirror the DeepSeek JSON output
@@ -104,6 +124,7 @@ export interface AnalysisResult {
 export interface StatusResponse {
   date: string
   submitted: Record<MemberName, boolean>
+  individual_ready: Record<MemberName, boolean>
   all_submitted: boolean
-  analysis_ready: boolean
+  team_summary_ready: boolean
 }

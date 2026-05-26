@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createDb, insertReview, getSubmittedCountForDate, getReviewsForDate, saveAnalysis, saveAssets } from '@/lib/db'
-import { buildPrompt, callDeepSeek } from '@/lib/ai'
+import {
+  createDb,
+  insertReview,
+  getSubmittedCountForDate,
+  getReviewsForDate,
+  getGoals,
+  saveIndividualAnalysis,
+  saveAnalysis,
+  saveAssets,
+} from '@/lib/db'
+import { analyzeIndividual, analyzeTeam } from '@/lib/ai'
 import { MEMBERS } from '@/types'
-import type { MemberName, AnalysisResult } from '@/types'
-import type Database from 'better-sqlite3'
+import type { MemberName } from '@/types'
 
 export async function POST(request: NextRequest) {
   const db = createDb()
@@ -27,9 +35,32 @@ export async function POST(request: NextRequest) {
     }
 
     const count = getSubmittedCountForDate(db, today)
+    const apiKey = process.env.DEEPSEEK_API_KEY
 
-    if (count === 4) {
-      triggerAnalysis(db, today).catch(console.error)
+    if (apiKey && apiKey !== 'your_key_here') {
+      const goals = getGoals(db)
+
+      // Immediately trigger individual analysis for this member
+      analyzeIndividual(today, member, content.trim(), goals, apiKey)
+        .then((feedback) => {
+          const db2 = createDb()
+          saveIndividualAnalysis(db2, member, today, feedback)
+          if (feedback.daily_asset?.content) {
+            saveAssets(db2, today, [{ member, asset: feedback.daily_asset }])
+          }
+        })
+        .catch(console.error)
+
+      // When all 4 submitted, trigger team summary
+      if (count === MEMBERS.length) {
+        const reviews = getReviewsForDate(db, today)
+        analyzeTeam(today, reviews, goals, apiKey)
+          .then((summary) => {
+            const db2 = createDb()
+            saveAnalysis(db2, today, summary)
+          })
+          .catch(console.error)
+      }
     }
 
     return NextResponse.json({ ok: true, submitted_count: count })
@@ -37,24 +68,4 @@ export async function POST(request: NextRequest) {
     console.error('Submit error:', error)
     return NextResponse.json({ error: '提交失败，请重试' }, { status: 500 })
   }
-}
-
-async function triggerAnalysis(db: Database.Database, date: string): Promise<void> {
-  const apiKey = process.env.DEEPSEEK_API_KEY
-  if (!apiKey || apiKey === 'your_key_here') {
-    console.error('DEEPSEEK_API_KEY not configured')
-    return
-  }
-
-  const reviews = getReviewsForDate(db, date)
-  const { systemPrompt, userPrompt } = buildPrompt(date, reviews)
-  const result: AnalysisResult = await callDeepSeek(systemPrompt, userPrompt, apiKey)
-
-  saveAnalysis(db, date, result)
-
-  const assets = MEMBERS.filter((m) => result.individual[m]?.daily_asset?.content).map((m) => ({
-    member: m,
-    asset: result.individual[m].daily_asset,
-  }))
-  saveAssets(db, date, assets)
 }

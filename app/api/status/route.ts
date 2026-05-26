@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createDb, getReviewByMemberAndDate, getAnalysis } from '@/lib/db'
+import { createDb, getReviewByMemberAndDate, getIndividualAnalysis, getAnalysis } from '@/lib/db'
 import { MEMBERS } from '@/types'
 import type { StatusResponse } from '@/types'
 
@@ -11,14 +11,19 @@ export async function GET(request: NextRequest) {
     MEMBERS.map((m) => [m, !!getReviewByMemberAndDate(db, m, date)])
   ) as StatusResponse['submitted']
 
+  const individual_ready = Object.fromEntries(
+    MEMBERS.map((m) => [m, !!getIndividualAnalysis(db, m, date)])
+  ) as StatusResponse['individual_ready']
+
   const all_submitted = MEMBERS.every((m) => submitted[m])
-  const analysis_ready = !!getAnalysis(db, date)
+  const team_summary_ready = !!getAnalysis(db, date)
 
   const response: StatusResponse = {
     date,
     submitted,
+    individual_ready,
     all_submitted,
-    analysis_ready,
+    team_summary_ready,
   }
 
   return NextResponse.json(response)

@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: daily-review
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /data/daily-review.db
+      - key: DEEPSEEK_API_KEY
+        sync: false
+    disk:
+      name: db
+      mountPath: /data
+      sizeGB: 1
