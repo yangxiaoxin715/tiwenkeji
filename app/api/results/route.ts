@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createDb, getAnalysis } from '@/lib/db'
 import type { AnalysisResult } from '@/types'

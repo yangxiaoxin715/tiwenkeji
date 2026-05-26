@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createDb, getGoals, saveGoals } from '@/lib/db'
 import type { Goals } from '@/types'

@@ -1,10 +1,12 @@
 import Database from 'better-sqlite3'
 import path from 'path'
+import fs from 'fs'
 import type { MemberName, ReviewRow, AnalysisRow, IndividualAnalysisRow, GoalsRow, Goals, DailyAsset } from '@/types'
 
 const DEFAULT_DB_PATH = process.env.DB_PATH || path.join(process.cwd(), 'data', 'daily-review.db')
 
 export function createDb(dbPath: string = DEFAULT_DB_PATH): Database.Database {
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true })
   const db = new Database(dbPath)
   db.pragma('journal_mode = WAL')
   initSchema(db)
