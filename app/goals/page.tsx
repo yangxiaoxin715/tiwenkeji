@@ -1,5 +1,4 @@
 import { createDb, getGoals } from '@/lib/db'
-import { MEMBERS } from '@/types'
 import GoalsForm from '@/components/GoalsForm'
 import Link from 'next/link'
 
