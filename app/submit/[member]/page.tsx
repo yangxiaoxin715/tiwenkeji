@@ -34,11 +34,11 @@ export default function SubmitPage({ params }: Props) {
             <pre className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">{existing.content}</pre>
           </div>
         ) : (
-          <div className="flex gap-6">
+          <div className="flex flex-col-reverse gap-5 md:flex-row md:gap-6">
             <div className="flex-1">
               <SubmitForm member={member} />
             </div>
-            <div className="w-72 shrink-0 bg-white rounded-2xl p-5 border border-gray-100 self-start">
+            <div className="md:w-72 md:shrink-0 bg-white rounded-2xl p-5 border border-gray-100 md:self-start">
               <QuestionGuide />
             </div>
           </div>
