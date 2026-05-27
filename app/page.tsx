@@ -55,11 +55,18 @@ export default function HomePage() {
         {teamSummaryReady && (
           <Link
             href={`/results/${today}?tab=team`}
-            className="block w-full text-center bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors"
+            className="block w-full text-center bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors mb-3"
           >
             查看团队汇总 →
           </Link>
         )}
+
+        <Link
+          href="/trend"
+          className="block w-full text-center bg-white border border-gray-200 text-gray-600 py-3 rounded-xl text-sm font-medium hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+        >
+          📈 趋势复盘（多天分析）
+        </Link>
       </div>
     </main>
   )

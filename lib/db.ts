@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs'
-import type { MemberName, ReviewRow, AnalysisRow, IndividualAnalysisRow, GoalsRow, Goals, DailyAsset } from '@/types'
+import type { MemberName, ReviewRow, AnalysisRow, IndividualAnalysisRow, GoalsRow, Goals, DailyAsset, TrendAnalysisRow } from '@/types'
 
 const DEFAULT_DB_PATH = process.env.DB_PATH || path.join(process.cwd(), 'data', 'daily-review.db')
 
@@ -48,6 +48,13 @@ function initSchema(db: Database.Database): void {
       type       TEXT NOT NULL,
       library    TEXT NOT NULL,
       use_for    TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS trend_analyses (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      period     TEXT NOT NULL UNIQUE,
+      result     TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -166,6 +173,35 @@ export function saveGoals(db: Database.Database, goals: Goals): void {
       'INSERT INTO goals (team_goal, individual_goals) VALUES (?, ?)'
     ).run(goals.team_goal, JSON.stringify(goals.individual_goals))
   }
+}
+
+export function getAvailableDates(db: Database.Database): string[] {
+  const rows = db
+    .prepare('SELECT DISTINCT date FROM reviews ORDER BY date DESC LIMIT 30')
+    .all() as { date: string }[]
+  return rows.map((r) => r.date)
+}
+
+export function getReviewsForDates(db: Database.Database, dates: string[]): ReviewRow[] {
+  if (dates.length === 0) return []
+  const placeholders = dates.map(() => '?').join(',')
+  return db
+    .prepare(`SELECT * FROM reviews WHERE date IN (${placeholders}) ORDER BY date ASC`)
+    .all(...dates) as ReviewRow[]
+}
+
+export function saveTrendAnalysis(db: Database.Database, period: string, result: object): void {
+  db.prepare(
+    'INSERT OR REPLACE INTO trend_analyses (period, result) VALUES (?, ?)'
+  ).run(period, JSON.stringify(result))
+}
+
+export function getTrendAnalysis(db: Database.Database, period: string): TrendAnalysisRow | null {
+  return (
+    (db
+      .prepare('SELECT * FROM trend_analyses WHERE period = ?')
+      .get(period) as TrendAnalysisRow) || null
+  )
 }
 
 export function saveAssets(

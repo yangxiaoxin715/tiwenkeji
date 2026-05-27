@@ -120,6 +120,32 @@ export interface AnalysisResult {
   team: TeamSummary
 }
 
+export interface MemberTrend {
+  bottleneck_pattern: string
+  goal_completion_rate: string
+  asset_accumulation: string
+  growth_observation: string
+}
+
+export interface TrendAnalysis {
+  period: string
+  days: string[]
+  individual_trends: Partial<Record<MemberName, MemberTrend>>
+  team_trends: {
+    recurring_bottleneck: string
+    asset_summary: string
+    goal_alignment_trend: string
+    top_recommendation: string
+  }
+}
+
+export interface TrendAnalysisRow {
+  id: number
+  period: string
+  result: string
+  created_at: string
+}
+
 // API response types
 export interface StatusResponse {
   date: string

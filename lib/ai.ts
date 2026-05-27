@@ -1,4 +1,4 @@
-import type { ReviewRow, IndividualFeedback, TeamSummary, Goals, MemberName } from '@/types'
+import type { ReviewRow, IndividualFeedback, TeamSummary, TrendAnalysis, Goals, MemberName } from '@/types'
 
 const TEAM_CONTEXT = `你是一位严格的创业团队复盘顾问。你的目标不是鼓励，而是帮助这个团队每天至少沉淀1个可复用资产。
 
@@ -210,4 +210,81 @@ export async function analyzeTeam(
     throw new Error(`Team analysis missing required fields: ${JSON.stringify(result)}`)
   }
   return result as unknown as TeamSummary
+}
+
+export async function analyzeTrend(
+  dates: string[],
+  reviews: ReviewRow[],
+  goals: Goals,
+  apiKey: string
+): Promise<TrendAnalysis> {
+  const period = `${dates[0]}~${dates[dates.length - 1]}`
+
+  // Group reviews by date
+  const byDate: Record<string, Record<string, string>> = {}
+  for (const r of reviews) {
+    if (!byDate[r.date]) byDate[r.date] = {}
+    byDate[r.date][r.member] = r.content
+  }
+
+  const reviewBlocks = dates.map((d) => {
+    const day = byDate[d] || {}
+    const lines = ['点妈', '花小蜜', '蜜蜜', '点妈客服']
+      .map((m) => `【${m}】\n${day[m] || '（未提交）'}`)
+      .join('\n\n')
+    return `=== ${d} ===\n${lines}`
+  }).join('\n\n')
+
+  const systemPrompt = `${TEAM_CONTEXT}
+
+## 分析任务：纵向趋势复盘（${dates.length}天）
+
+基于连续多天的复盘数据，识别规律、趋势和建议。
+
+### 个人趋势（每人）
+- bottleneck_pattern：卡点是否在重复？是什么模式？
+- goal_completion_rate：目标完成率如何变化？（如"3天中完成2天，未完成原因集中在XXX"）
+- asset_accumulation：实际沉淀了哪些资产？有没有停留在口头的？
+- growth_observation：这几天最明显的成长或退步是什么？
+
+### 团队趋势
+- recurring_bottleneck：全队最高频的障碍是什么？
+- asset_summary：这几天团队真正沉淀的资产清单
+- goal_alignment_trend：团队目标对齐度的变化趋势
+- top_recommendation：最值得下周优先解决的一件事
+
+## 输出格式（严格JSON）
+
+{
+  "period": "${period}",
+  "days": ${JSON.stringify(dates)},
+  "individual_trends": {
+    "点妈": { "bottleneck_pattern": "...", "goal_completion_rate": "...", "asset_accumulation": "...", "growth_observation": "..." },
+    "花小蜜": { "bottleneck_pattern": "...", "goal_completion_rate": "...", "asset_accumulation": "...", "growth_observation": "..." },
+    "蜜蜜": { "bottleneck_pattern": "...", "goal_completion_rate": "...", "asset_accumulation": "...", "growth_observation": "..." },
+    "点妈客服": { "bottleneck_pattern": "...", "goal_completion_rate": "...", "asset_accumulation": "...", "growth_observation": "..." }
+  },
+  "team_trends": {
+    "recurring_bottleneck": "...",
+    "asset_summary": "...",
+    "goal_alignment_trend": "...",
+    "top_recommendation": "..."
+  }
+}
+
+直接输出JSON，不废话。`
+
+  const userPrompt = `**团队目标：** ${goals.team_goal || '（未设定）'}
+
+以下是 ${dates.length} 天的复盘原文：
+
+${reviewBlocks}
+
+请完成趋势分析，严格输出JSON。`
+
+  const result = await callDeepSeek(systemPrompt, userPrompt, apiKey) as Record<string, unknown>
+  if (!result.individual_trends || !result.team_trends) {
+    throw new Error(`Trend analysis missing required fields: ${JSON.stringify(result)}`)
+  }
+  return result as unknown as TrendAnalysis
 }
