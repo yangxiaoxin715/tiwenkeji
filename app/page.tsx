@@ -21,13 +21,19 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-md">
-        <div className="flex items-center justify-between mb-1">
-          <h1 className="text-2xl font-bold text-gray-900">每日复盘</h1>
-          <Link href="/goals" className="text-sm text-gray-400 hover:text-indigo-500 transition-colors">
-            ⚙ 目标设置
-          </Link>
-        </div>
-        <p className="text-gray-500 text-sm mb-8">{today}</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">每日复盘</h1>
+        <p className="text-gray-500 text-sm mb-6">{today}</p>
+
+        <Link
+          href="/goals"
+          className="flex items-center justify-between w-full bg-white border-2 border-indigo-200 rounded-2xl px-5 py-4 mb-6 hover:border-indigo-400 transition-colors"
+        >
+          <div>
+            <p className="text-sm font-bold text-indigo-700">🎯 团队目标设置</p>
+            <p className="text-xs text-gray-400 mt-0.5">点击查看或修改目标</p>
+          </div>
+          <span className="text-indigo-400 text-lg">→</span>
+        </Link>
 
         <div className="grid grid-cols-2 gap-4 mb-6">
           {MEMBERS.map((member) => (
