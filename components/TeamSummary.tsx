@@ -1,23 +1,21 @@
 import type { TeamSummary as TeamSummaryType } from '@/types'
 
-interface TeamSummaryProps {
-  summary: TeamSummaryType
-}
+const ITEMS = [
+  { icon: '🚧', label: '今日瓶颈', key: 'bottleneck' as const, accent: 'border-l-red-400' },
+  { icon: '⭐', label: '最佳实践广播', key: 'best_practice' as const, accent: 'border-l-amber-400' },
+  { icon: '🔧', label: '优先修复的流程漏洞', key: 'process_fix' as const, accent: 'border-l-blue-400' },
+  { icon: '🎯', label: '目标对齐度', key: 'alignment' as const, accent: 'border-l-emerald-400' },
+]
 
-export default function TeamSummary({ summary }: TeamSummaryProps) {
-  const items = [
-    { icon: '🚧', label: '今日瓶颈', value: summary.bottleneck },
-    { icon: '⭐', label: '最佳实践广播', value: summary.best_practice },
-    { icon: '🔧', label: '优先修复的流程漏洞', value: summary.process_fix },
-    { icon: '🎯', label: '目标对齐度', value: summary.alignment },
-  ]
-
+export default function TeamSummary({ summary }: { summary: TeamSummaryType }) {
   return (
-    <div className="space-y-4">
-      {items.map(({ icon, label, value }) => (
-        <div key={label} className="bg-white rounded-2xl p-5 border border-gray-100">
-          <p className="text-sm font-semibold text-gray-500 mb-2">{icon} {label}</p>
-          <p className="text-gray-800 leading-relaxed">{value}</p>
+    <div className="space-y-3">
+      {ITEMS.map(({ icon, label, key, accent }) => (
+        <div key={key} className={`bg-white rounded-2xl shadow-sm border border-slate-100 border-l-4 ${accent} p-5`}>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            {icon} {label}
+          </p>
+          <p className="text-sm text-slate-700 leading-relaxed">{summary[key]}</p>
         </div>
       ))}
     </div>

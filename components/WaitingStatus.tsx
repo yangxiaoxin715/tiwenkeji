@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { MemberName, StatusResponse } from '@/types'
 
+const MEMBER_GRADIENT: Record<MemberName, string> = {
+  '点妈':    'from-violet-500 to-indigo-600',
+  '花小蜜':  'from-pink-400 to-rose-500',
+  '蜜蜜':   'from-amber-400 to-orange-400',
+  '点妈客服': 'from-teal-400 to-cyan-500',
+}
+
 interface WaitingStatusProps {
   member: MemberName
   initialStatus: StatusResponse
@@ -29,28 +36,28 @@ export default function WaitingStatus({ member, initialStatus }: WaitingStatusPr
           clearInterval(interval)
           router.push(`/results/${data.date}`)
         }
-      } catch {
-        // network error — keep polling
-      }
+      } catch { /* keep polling */ }
     }, 3000)
 
     return () => clearInterval(interval)
   }, [status.individual_ready, member, status.date, router])
 
   const ready = status.individual_ready[member]
+  const gradient = MEMBER_GRADIENT[member]
 
   return (
-    <div className="flex flex-col items-center gap-6">
-      <div className="text-5xl">
-        {ready ? '✅' : '🤖'}
+    <div className="flex flex-col items-center gap-6 text-center max-w-xs">
+      {/* Animated circle */}
+      <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg ${ready ? '' : 'animate-pulse'}`}>
+        <span className="text-4xl">{ready ? '✅' : '🤖'}</span>
       </div>
 
-      <div className="text-center">
-        <p className="text-xl font-bold text-gray-900 mb-1">
-          {ready ? '分析完成！正在跳转…' : 'AI 正在生成你的个人反馈…'}
+      <div>
+        <p className="text-xl font-bold text-slate-800 mb-1">
+          {ready ? '分析完成！' : 'AI 正在生成反馈…'}
         </p>
-        <p className="text-gray-500 text-sm">
-          {ready ? '' : '通常需要 10~30 秒，请稍候'}
+        <p className="text-sm text-slate-400">
+          {ready ? '正在跳转…' : '通常需要 10~30 秒，请稍候'}
         </p>
       </div>
 

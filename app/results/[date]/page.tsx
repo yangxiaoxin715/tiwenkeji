@@ -27,39 +27,41 @@ export default function ResultsPage({ params, searchParams }: Props) {
 
   const individual = Object.fromEntries(
     MEMBERS.filter((m) => individualRows[m]).map((m) => [
-      m,
-      JSON.parse(individualRows[m]!.result) as IndividualFeedback,
+      m, JSON.parse(individualRows[m]!.result) as IndividualFeedback,
     ])
   )
   const teamSummary = teamRow ? (JSON.parse(teamRow.result) as TeamSummary) : null
-
   const activeTab = searchParams.tab === 'team' ? 'team' : 'individual'
+  const submittedCount = MEMBERS.filter((m) => individualRows[m]).length
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <Link href="/" className="text-gray-400 hover:text-gray-600 text-sm">← 首页</Link>
-          <h1 className="text-xl font-bold text-gray-900">复盘分析 · {date}</h1>
-        </div>
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <div className="bg-gradient-to-br from-indigo-600 to-violet-600 px-6 pt-12 pb-20">
+        <Link href="/" className="text-indigo-300 text-sm hover:text-white transition-colors">← 首页</Link>
+        <h1 className="text-2xl font-bold text-white tracking-tight mt-2">复盘分析</h1>
+        <p className="text-indigo-300 text-sm mt-0.5">{date}</p>
+      </div>
 
-        <div className="flex gap-2 mb-6">
+      <div className="px-4 -mt-10 max-w-2xl mx-auto pb-10 space-y-4">
+        {/* Tabs */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-1.5 flex gap-1">
           <Link
             href={`/results/${date}?tab=individual`}
-            className={`px-5 py-2 rounded-xl text-sm font-semibold transition-colors ${
+            className={`flex-1 text-center py-2.5 rounded-xl text-sm font-semibold transition-colors ${
               activeTab === 'individual'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-white text-gray-600 border border-gray-200 hover:border-indigo-300'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             个人反馈
           </Link>
           <Link
             href={`/results/${date}?tab=team`}
-            className={`px-5 py-2 rounded-xl text-sm font-semibold transition-colors ${
+            className={`flex-1 text-center py-2.5 rounded-xl text-sm font-semibold transition-colors ${
               activeTab === 'team'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-white text-gray-600 border border-gray-200 hover:border-indigo-300'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             团队汇总
@@ -67,16 +69,14 @@ export default function ResultsPage({ params, searchParams }: Props) {
         </div>
 
         {activeTab === 'individual' ? (
-          <div className="space-y-5">
+          <div className="space-y-4">
             {MEMBERS.map((member) =>
               individual[member] ? (
                 <FeedbackCard key={member} member={member} feedback={individual[member]} />
               ) : (
-                <div key={member} className="bg-white rounded-2xl border border-gray-100 p-5">
-                  <div className="px-0 py-0 mb-2">
-                    <h3 className="font-bold text-gray-400 text-lg">{member}</h3>
-                  </div>
-                  <p className="text-sm text-gray-400">尚未提交或分析中…</p>
+                <div key={member} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+                  <p className="text-slate-400 font-semibold mb-0.5">{member}</p>
+                  <p className="text-sm text-slate-300">尚未提交或分析中…</p>
                 </div>
               )
             )}
@@ -84,15 +84,13 @@ export default function ResultsPage({ params, searchParams }: Props) {
         ) : teamSummary ? (
           <TeamSummaryComponent summary={teamSummary} />
         ) : (
-          <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
-            <p className="text-4xl mb-4">⏳</p>
-            <p className="font-semibold text-gray-700 mb-1">等待全员提交后生成</p>
-            <p className="text-sm text-gray-400">
-              {MEMBERS.filter((m) => individualRows[m]).length} / 4 人已提交
-            </p>
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-10 text-center">
+            <p className="text-4xl mb-3">⏳</p>
+            <p className="font-semibold text-slate-700 mb-1">等待全员提交后生成</p>
+            <p className="text-sm text-slate-400">{submittedCount} / 4 人已提交</p>
           </div>
         )}
       </div>
-    </main>
+    </div>
   )
 }

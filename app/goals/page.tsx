@@ -9,15 +9,16 @@ export default function GoalsPage() {
   const goals = getGoals(db)
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <Link href="/" className="text-gray-400 hover:text-gray-600 text-sm">← 首页</Link>
-          <h1 className="text-xl font-bold text-gray-900">目标设置</h1>
-        </div>
-        <p className="text-sm text-gray-500 mb-6">在此设置团队目标和各人个人目标，AI 分析时会以此为参照。</p>
+    <div className="min-h-screen bg-slate-50">
+      <div className="bg-gradient-to-br from-indigo-600 to-violet-600 px-6 pt-12 pb-20">
+        <Link href="/" className="text-indigo-300 text-sm hover:text-white transition-colors">← 首页</Link>
+        <h1 className="text-2xl font-bold text-white tracking-tight mt-2">目标设置</h1>
+        <p className="text-indigo-300 text-sm mt-0.5">会议后在此录入，AI 分析时自动参照</p>
+      </div>
+
+      <div className="px-4 -mt-10 max-w-xl mx-auto pb-10">
         <GoalsForm initialGoals={goals} />
       </div>
-    </main>
+    </div>
   )
 }

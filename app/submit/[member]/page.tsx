@@ -8,6 +8,13 @@ import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
+const HEADER_GRADIENT: Record<MemberName, string> = {
+  '点妈':    'from-violet-500 to-indigo-600',
+  '花小蜜':  'from-pink-400 to-rose-500',
+  '蜜蜜':   'from-amber-400 to-orange-400',
+  '点妈客服': 'from-teal-400 to-cyan-500',
+}
+
 interface Props {
   params: { member: string }
 }
@@ -21,29 +28,34 @@ export default function SubmitPage({ params }: Props) {
   const existing = getReviewByMemberAndDate(db, member, today)
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <Link href="/" className="text-gray-400 hover:text-gray-600 text-sm">← 返回</Link>
-          <h1 className="text-xl font-bold text-gray-900">{member} · {today}</h1>
-        </div>
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <div className={`bg-gradient-to-br ${HEADER_GRADIENT[member]} px-6 pt-12 pb-20`}>
+        <Link href="/" className="text-white/60 text-sm hover:text-white transition-colors">← 返回</Link>
+        <h1 className="text-2xl font-bold text-white tracking-tight mt-2">{member}</h1>
+        <p className="text-white/70 text-sm mt-0.5">{today} · 今日复盘</p>
+      </div>
 
+      <div className="px-4 -mt-10 max-w-4xl mx-auto pb-10">
         {existing ? (
-          <div className="bg-white rounded-2xl p-6 border-2 border-green-200">
-            <p className="text-green-600 font-semibold mb-3">✅ 今天已提交</p>
-            <pre className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">{existing.content}</pre>
+          <div className="bg-white rounded-2xl shadow-sm border border-emerald-100 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-emerald-500 text-lg">✅</span>
+              <p className="text-emerald-700 font-semibold">今天已提交</p>
+            </div>
+            <pre className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed font-sans">{existing.content}</pre>
           </div>
         ) : (
-          <div className="flex flex-col-reverse gap-5 md:flex-row md:gap-6">
+          <div className="flex flex-col-reverse gap-4 md:flex-row md:gap-6">
             <div className="flex-1">
               <SubmitForm member={member} />
             </div>
-            <div className="md:w-72 md:shrink-0 bg-white rounded-2xl p-5 border border-gray-100 md:self-start">
+            <div className="md:w-72 md:shrink-0 bg-white rounded-2xl shadow-sm border border-slate-100 p-5 md:self-start">
               <QuestionGuide />
             </div>
           </div>
         )}
       </div>
-    </main>
+    </div>
   )
 }

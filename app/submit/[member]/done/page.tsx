@@ -6,6 +6,13 @@ import WaitingStatus from '@/components/WaitingStatus'
 
 export const dynamic = 'force-dynamic'
 
+const HEADER_GRADIENT: Record<MemberName, string> = {
+  '点妈':    'from-violet-500 to-indigo-600',
+  '花小蜜':  'from-pink-400 to-rose-500',
+  '蜜蜜':   'from-amber-400 to-orange-400',
+  '点妈客服': 'from-teal-400 to-cyan-500',
+}
+
 interface Props {
   params: { member: string }
 }
@@ -34,8 +41,8 @@ export default function DonePage({ params }: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+    <div className={`min-h-screen bg-gradient-to-br ${HEADER_GRADIENT[member]} flex items-center justify-center p-6`}>
       <WaitingStatus member={member} initialStatus={initialStatus} />
-    </main>
+    </div>
   )
 }

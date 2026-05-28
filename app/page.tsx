@@ -1,4 +1,4 @@
-import { createDb, getReviewByMemberAndDate, getIndividualAnalysis, getAnalysis } from '@/lib/db'
+import { createDb, getReviewByMemberAndDate, getIndividualAnalysis, getAnalysis, getGoals } from '@/lib/db'
 import { MEMBERS } from '@/types'
 import MemberCard from '@/components/MemberCard'
 import Link from 'next/link'
@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 export default function HomePage() {
   const db = createDb()
   const today = new Date().toISOString().slice(0, 10)
+  const goals = getGoals(db)
 
   const submitted = Object.fromEntries(
     MEMBERS.map((m) => [m, !!getReviewByMemberAndDate(db, m, today)])
@@ -19,23 +20,48 @@ export default function HomePage() {
   const teamSummaryReady = !!getAnalysis(db, today)
 
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">每日复盘</h1>
-        <p className="text-gray-500 text-sm mb-6">{today}</p>
+    <div className="min-h-screen bg-slate-50">
+      {/* Gradient header */}
+      <div className="bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 px-6 pt-12 pb-20">
+        <p className="text-indigo-300 text-sm mb-1 font-medium">{today}</p>
+        <h1 className="text-3xl font-bold text-white tracking-tight">每日复盘</h1>
+      </div>
 
-        <Link
-          href="/goals"
-          className="flex items-center justify-between w-full bg-white border-2 border-indigo-200 rounded-2xl px-5 py-4 mb-6 hover:border-indigo-400 transition-colors"
-        >
-          <div>
-            <p className="text-sm font-bold text-indigo-700">🎯 团队目标设置</p>
-            <p className="text-xs text-gray-400 mt-0.5">点击查看或修改目标</p>
+      {/* Content — overlaps header with -mt */}
+      <div className="px-4 -mt-10 max-w-md mx-auto space-y-3 pb-10">
+
+        {/* Goals card */}
+        <Link href="/goals" className="block bg-white rounded-2xl shadow-sm p-4 border border-slate-100 hover:shadow-md transition-shadow">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">🎯 团队目标</p>
+              <p className="text-sm text-slate-700 leading-relaxed line-clamp-2">
+                {goals.team_goal || '点击设置团队目标…'}
+              </p>
+            </div>
+            <span className="text-slate-300 shrink-0 mt-0.5 text-lg">✏️</span>
           </div>
-          <span className="text-indigo-400 text-lg">→</span>
         </Link>
 
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        {/* Progress */}
+        <div className="bg-white rounded-2xl shadow-sm p-4 border border-slate-100">
+          <div className="flex items-center justify-between mb-2.5">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">今日进度</p>
+            <p className="text-sm font-bold text-slate-700">{submittedCount} / 4</p>
+          </div>
+          <div className="w-full bg-slate-100 rounded-full h-2">
+            <div
+              className="bg-gradient-to-r from-indigo-500 to-violet-500 h-2 rounded-full transition-all duration-700"
+              style={{ width: `${(submittedCount / 4) * 100}%` }}
+            />
+          </div>
+          {submittedCount === MEMBERS.length && !teamSummaryReady && (
+            <p className="text-xs text-indigo-500 mt-2 font-medium animate-pulse">⚡ AI 生成团队汇总中…</p>
+          )}
+        </div>
+
+        {/* Member grid */}
+        <div className="grid grid-cols-2 gap-3">
           {MEMBERS.map((member) => (
             <MemberCard
               key={member}
@@ -47,27 +73,26 @@ export default function HomePage() {
           ))}
         </div>
 
-        <p className="text-center text-gray-500 text-sm mb-4">
-          {submittedCount} / 4 人已提交
-          {submittedCount === MEMBERS.length && !teamSummaryReady && ' · 团队汇总生成中…'}
-        </p>
-
+        {/* Team summary */}
         {teamSummaryReady && (
           <Link
             href={`/results/${today}?tab=team`}
-            className="block w-full text-center bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors mb-3"
+            className="flex items-center justify-between w-full bg-indigo-600 text-white px-5 py-4 rounded-2xl font-semibold hover:bg-indigo-700 transition-colors shadow-sm"
           >
-            查看团队汇总 →
+            <span>查看今日团队汇总</span>
+            <span className="text-indigo-300">→</span>
           </Link>
         )}
 
+        {/* Trend entry */}
         <Link
           href="/trend"
-          className="block w-full text-center bg-white border border-gray-200 text-gray-600 py-3 rounded-xl text-sm font-medium hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+          className="flex items-center justify-between w-full bg-white border border-slate-200 px-5 py-4 rounded-2xl text-sm font-medium text-slate-600 hover:border-indigo-300 hover:text-indigo-600 transition-colors shadow-sm"
         >
-          📈 趋势复盘（多天分析）
+          <span>📈 趋势复盘（多天分析）</span>
+          <span className="text-slate-300">→</span>
         </Link>
       </div>
-    </main>
+    </div>
   )
 }
